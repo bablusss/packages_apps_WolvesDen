@@ -39,6 +39,7 @@ public class VariousSystem extends SettingsPreferenceFragment implements
 
     private static final String SYSTEMUI_THEME_STYLE = "systemui_theme_style";
     private static final String SCREEN_OFF_ANIMATION = "screen_off_animation";
+    private static final String INCALL_VIB_OPTIONS = "incall_vib_options";
 
     private ListPreference mSystemUIThemeStyle;
     private ListPreference mScreenOffAnimation;
@@ -50,6 +51,13 @@ public class VariousSystem extends SettingsPreferenceFragment implements
         addPreferencesFromResource(R.xml.various_system);
 
         ContentResolver resolver = getActivity().getContentResolver();
+
+        PreferenceScreen prefScreen = getPreferenceScreen();
+
+        PreferenceCategory incallVibCategory = (PreferenceCategory) findPreference(INCALL_VIB_OPTIONS);
+        if (!Utils.isVoiceCapable(getActivity())) {
+            prefScreen.removePreference(incallVibCategory);
+        }
 
         mSystemUIThemeStyle = (ListPreference) findPreference(SYSTEMUI_THEME_STYLE);
         int systemUIThemeStyle = Settings.System.getInt(resolver,

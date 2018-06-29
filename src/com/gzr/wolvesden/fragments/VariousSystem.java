@@ -40,9 +40,11 @@ public class VariousSystem extends SettingsPreferenceFragment implements
     private static final String SYSTEMUI_THEME_STYLE = "systemui_theme_style";
     private static final String SCREEN_OFF_ANIMATION = "screen_off_animation";
     private static final String INCALL_VIB_OPTIONS = "incall_vib_options";
+    private static final String FLASHLIGHT_ON_CALL = "flashlight_on_call";
 
     private ListPreference mSystemUIThemeStyle;
     private ListPreference mScreenOffAnimation;
+    private ListPreference mFlashlightOnCall; 
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -53,6 +55,7 @@ public class VariousSystem extends SettingsPreferenceFragment implements
         ContentResolver resolver = getActivity().getContentResolver();
 
         PreferenceScreen prefScreen = getPreferenceScreen();
+        PreferenceScreen prefSet = getPreferenceScreen();
 
         PreferenceCategory incallVibCategory = (PreferenceCategory) findPreference(INCALL_VIB_OPTIONS);
         if (!Utils.isVoiceCapable(getActivity())) {
@@ -74,6 +77,19 @@ public class VariousSystem extends SettingsPreferenceFragment implements
         mScreenOffAnimation.setValue(String.valueOf(screenOffStyle));
         mScreenOffAnimation.setSummary(mScreenOffAnimation.getEntry());
         mScreenOffAnimation.setOnPreferenceChangeListener(this);
+
+        
+        mFlashlightOnCall = (ListPreference) findPreference(FLASHLIGHT_ON_CALL);
+        Preference FlashOnCall = findPreference("flashlight_on_call");
+        int flashlightValue = Settings.System.getInt(getContentResolver(),
+                Settings.System.FLASHLIGHT_ON_CALL, 0);
+        mFlashlightOnCall.setValue(String.valueOf(flashlightValue));
+        mFlashlightOnCall.setSummary(mFlashlightOnCall.getEntry());
+        mFlashlightOnCall.setOnPreferenceChangeListener(this);
+
+        if (!Utils.deviceSupportsFlashLight(getActivity())) {
+            prefSet.removePreference(FlashOnCall);
+        }
     }
 
     @Override
@@ -102,6 +118,13 @@ public class VariousSystem extends SettingsPreferenceFragment implements
                     Settings.System.SCREEN_OFF_ANIMATION, Integer.valueOf(value));
             int valueIndex = mScreenOffAnimation.findIndexOfValue(value);
             mScreenOffAnimation.setSummary(mScreenOffAnimation.getEntries()[valueIndex]);
+            return true;
+        }else if (preference == mFlashlightOnCall) {
+            int flashlightValue = Integer.parseInt(((String) newValue).toString());
+            Settings.System.putInt(getContentResolver(),
+                  Settings.System.FLASHLIGHT_ON_CALL, flashlightValue);
+            mFlashlightOnCall.setValue(String.valueOf(flashlightValue));
+            mFlashlightOnCall.setSummary(mFlashlightOnCall.getEntry());
             return true;
         }
         return false;

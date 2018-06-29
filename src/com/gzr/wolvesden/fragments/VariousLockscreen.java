@@ -33,15 +33,19 @@ import com.android.settings.R;
 import com.android.settings.SettingsPreferenceFragment;
 import com.android.internal.logging.nano.MetricsProto;
 import com.android.settings.Utils;
+import com.gzr.wolvesden.preference.SystemSettingSwitchPreference;
 
 public class VariousLockscreen extends SettingsPreferenceFragment implements
         Preference.OnPreferenceChangeListener {
 
     private static final String KEY_LOCKSCREEN_CLOCK_SELECTION = "lockscreen_clock_selection";
     private static final String KEY_LOCKSCREEN_DATE_SELECTION = "lockscreen_date_selection";
+    private static final String FP_UNLOCK_KEYSTORE = "fp_unlock_keystore";
+    private static final String FP_CAT = "lockscreen_ui_general_category";
 
     private ListPreference mLockscreenClockSelection;
     private ListPreference mLockscreenDateSelection;
+    private SystemSettingSwitchPreference mFpKeystore;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -49,6 +53,7 @@ public class VariousLockscreen extends SettingsPreferenceFragment implements
 
         addPreferencesFromResource(R.xml.various_lockscreen);
         ContentResolver resolver = getActivity().getContentResolver();
+        PreferenceCategory fingerprintCategory = (PreferenceCategory) findPreference(FP_CAT);
 
         mLockscreenClockSelection = (ListPreference) findPreference(KEY_LOCKSCREEN_CLOCK_SELECTION);
         int clockSelection = Settings.System.getIntForUser(resolver,
@@ -63,6 +68,7 @@ public class VariousLockscreen extends SettingsPreferenceFragment implements
         mLockscreenDateSelection.setValue(String.valueOf(dateSelection));
         mLockscreenDateSelection.setSummary(mLockscreenDateSelection.getEntry());
         mLockscreenDateSelection.setOnPreferenceChangeListener(this);
+        mFpKeystore = (SystemSettingSwitchPreference) findPreference(FP_UNLOCK_KEYSTORE);
     }
 
     @Override
@@ -85,6 +91,8 @@ public class VariousLockscreen extends SettingsPreferenceFragment implements
             Settings.System.putIntForUser(resolver,
                     Settings.System.LOCKSCREEN_DATE_SELECTION, dateSelection, UserHandle.USER_CURRENT);
             mLockscreenDateSelection.setSummary(mLockscreenDateSelection.getEntries()[index]);
+            PreferenceCategory fingerprintCategory = (PreferenceCategory) findPreference(FP_CAT);
+            fingerprintCategory.removePreference(mFpKeystore);
             return true;
         }
         return false;
